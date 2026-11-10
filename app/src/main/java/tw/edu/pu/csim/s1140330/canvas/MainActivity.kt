@@ -57,10 +57,8 @@ fun CanvasScreen(modifier: Modifier = Modifier) {
     var minionsX by remember { mutableStateOf(50f) }
     var minionsY by remember { mutableStateOf(50f) }
 
-    // 新增：控制遊戲是否正在執行的狀態
     var isPlaying by remember { mutableStateOf(false) }
 
-    // 當 isPlaying 為 true 時，LaunchedEffect 才會啟動動畫迴圈
     LaunchedEffect(isPlaying) {
         val speed = 5f
         while (isPlaying) {
@@ -68,12 +66,13 @@ fun CanvasScreen(modifier: Modifier = Modifier) {
                 minionsX += speed
                 minionsY += speed
 
-                // 如果超出畫布邊界，可以選擇讓它重置回左上角（選擇性）
-                if (canvasWidth > 0 && minionsX > canvasWidth) {
-                    minionsX = -100f // 移出右邊界後從左側重新出現
-                }
-                if (canvasHeight > 0 && minionsY > canvasHeight) {
-                    minionsY = -100f
+                // 當畫布寬高已取得，且小小兵超過邊界時
+                if (canvasWidth > 0f && canvasHeight > 0f) {
+                    if (minionsX > canvasWidth || minionsY > canvasHeight) {
+                        minionsX = 0f
+                        minionsY = 0f
+                        isPlaying = false // 歸零後自動停止遊戲
+                    }
                 }
             }
         }
@@ -116,13 +115,11 @@ fun CanvasScreen(modifier: Modifier = Modifier) {
             }
         }
 
-        // 畫布上方的文字資訊
         Text(
             text = "畫布寬度 $canvasWidth, 長度 $canvasHeight",
             modifier = Modifier.padding(16.dp)
         )
 
-        // 新增：控制遊戲開始/停止的按鈕（放在畫面下方中央）
         Button(
             onClick = { isPlaying = !isPlaying },
             modifier = Modifier
